@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- JS -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"
+            integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+            crossorigin="anonymous"></script>
+
+    <!-- 구글폰트 -->
+    <link href="https://fonts.googleapis.com/css?family=Stylish&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/style.css">
+    <title>나홀로 메모장</title>
+</head>
+
+<body>
+<div class="container">
+    <div class="title">나홀로 메모장 ver1.0</div>
+
+    <form id="memo-form">
+        <div class="input-group">
+            <label for="input-title">제목:</label>
+            <input type="text" id="input-title" name="title" placeholder="제목을 입력하세요">
+        </div>
+        <div class="input-group">
+            <label for="input-text">내용:</label>
+            <textarea id="input-text" name="text" placeholder="내용을 입력하세요"></textarea>
+        </div>
+        <button type="submit" class="btn-save">저장하기</button>
+    </form>
+
+    <br>
+
+    <div class="card-list" id="card-list"></div>
+
+</div>
+
+<script>
+    // 메모 저장 시 실행될 함수
+    function saveMemo(event) {
+        event.preventDefault();
+
+        let title = $("#input-title").val();
+        let text = $("#input-text").val();
+
+        $.ajax({
+            type: "POST",
+            url: "/save",
+            data: {
+                title: title,
+                text: text
+            },
+            success: function (response) {
+                addMemoCard(response.memo_id, title, text);
+                $("#input-title").val("");
+                $("#input-text").val("");
+            },
+            error: function () {
+                alert("메모를 저장할 수 없습니다.");
+            }
+        });
+    }
+
+    // 메모 카드 추가 함수
+    function addMemoCard(memoId, title, text) {
+        let card = '<div id="memo-card-' + memoId + '" class="card">' +
+            '<div class="card-title">' + title + '</div>' +
+            '<div class="card-text">' + text + '</div>' +
+            '<div class="card-buttons">' +
+            '<button class = "btn-update" onclick="showModifyForm(\'' + memoId + '\', \'' + title + '\', \'' + text + '\')">수정</button>' +
+            '<button class = "btn-delete" onclick="deleteMemo(\'' + memoId + '\')">삭제</button>' +
+            '</div>' +
+            '</div>';
+
+        $("#card-list").append(card);
+    }
+
+    // 메모 수정 입력창 표시 함수
+    function showModifyForm(memoId, title, text) {
+        let card = $("#memo-card-" + memoId);
+        let titleElement = card.find(".card-title");
+        let textElement = card.find(".card-text");
+
+        let modTitle = $('<input type="text" class="mod-title">').val(title);
+        let modText = $('<textarea class="mod-text">').val(text);
+        let updateButton = $('<button class="mod-update-btn" onclick="modifyMemo(\'' + memoId + '\')">저장</button>');
+
+        titleElement.hide();
+        textElement.hide();
+
+        titleElement.after(modTitle);
+        textElement.after(modText);
+        card.find(".card-buttons").empty().append(updateButton);
+    }
+
+    // 메모 수정 함수
+    function modifyMemo(memoId) {
+        let card = $("#memo-card-" + memoId);
+        let title = card.find(".mod-title").val();
+        let text = card.find(".mod-text").val();
+
+        $.ajax({
+            type: "POST",
+            url: "/update",
+            data: {
+                memo_id: memoId,
+                title: title,
+                text: text
+            },
+            success: function () {
+                card.find(".mod-title").remove();
+                card.find(".mod-text").remove();
+                card.find("button").remove();
+
+                card.find(".card-title").text(title).show();
+                card.find(".card-text").text(text).show();
+                card.find(".card-buttons").append('<button class = "btn-update" onclick="showModifyForm(\'' + memoId + '\', \'' + title + '\', \'' + text + '\')">수정</button>').append('<button class = "btn-delete" onclick="deleteMemo(\'' + memoId + '\')">삭제</button>');
+            },
+            error: function () {
+                alert("메모를 수정할 수 없습니다.");
+            }
+        });
+    }
+
+
+    // 메모 삭제 함수
+    function deleteMemo(memoId) {
+        if (confirm("정말로 삭제하시겠습니까?")) {
+            $.ajax({
+                type: "POST",
+                url: "/delete",
+                data: {
+                    memo_id: memoId
+                },
+                success: function () {
+                    $("#memo-card-" + memoId).remove();
+                },
+                error: function () {
+                    alert("메모를 삭제할 수 없습니다.");
+                }
+            });
+        }
+    }
+
+    $(document).ready(function () {
+        $("#memo-form").submit(saveMemo);
+    });
+</script>
+</body>
+</html>
+

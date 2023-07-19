@@ -45,7 +45,7 @@
 </div>
 
 <script>
-    // 메모 저장 시 실행될 함수
+    // 메모 저장
     function saveMemo(event) {
         event.preventDefault();
 
@@ -70,7 +70,7 @@
         });
     }
 
-    // 메모 카드 추가 함수
+    // 메모 카드 추가
     function addMemoCard(memoId, title, text) {
         let card = '<div id="memo-card-' + memoId + '" class="card">' +
             '<div class="card-title">' + title + '</div>' +
@@ -84,7 +84,7 @@
         $("#card-list").append(card);
     }
 
-    // 메모 수정 입력창 표시 함수
+    // 메모 수정 입력창
     function showModifyForm(memoId, title, text) {
         let card = $("#memo-card-" + memoId);
         let titleElement = card.find(".card-title");
@@ -102,7 +102,7 @@
         card.find(".card-buttons").empty().append(updateButton);
     }
 
-    // 메모 수정 함수
+    // 메모 수정
     function modifyMemo(memoId) {
         let card = $("#memo-card-" + memoId);
         let title = card.find(".mod-title").val();
@@ -132,7 +132,7 @@
     }
 
 
-    // 메모 삭제 함수
+    // 메모 삭제
     function deleteMemo(memoId) {
         if (confirm("정말로 삭제하시겠습니까?")) {
             $.ajax({

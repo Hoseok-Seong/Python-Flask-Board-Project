@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, jsonify
 from pymongo import MongoClient
 
 app = Flask(__name__)
-client = MongoClient("mongodb://localhost:27017")
+client = MongoClient("mongodb://test:test@IP주소", 27017)
 db = client["memo_app"]
 memo_collection = db["memos"]
 
@@ -42,4 +42,4 @@ def delete_memo():
     return jsonify({"success": True})
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run('0.0.0.0', port=5000, debug=True)
